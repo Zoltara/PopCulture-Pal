@@ -47,7 +47,6 @@ export async function fetchSeries(): Promise<string[]> {
   const { data, error } = await supabase
     .from('tracked_series')
     .select('series_name')
-    .eq('device_id', OWNER_ID)
     .order('added_at', { ascending: true });
 
   if (error) throw error;
@@ -68,7 +67,6 @@ export async function removeSeries(name: string): Promise<void> {
   const { error } = await supabase
     .from('tracked_series')
     .delete()
-    .eq('device_id', OWNER_ID)
     .eq('series_name', name);
 
   if (error) throw error;
@@ -81,10 +79,11 @@ export async function fetchSettings(): Promise<TrackerSettings | null> {
   const { data, error } = await supabase
     .from('tracker_settings')
     .select('notif_enabled, last_checked_at')
-    .eq('device_id', OWNER_ID)
-    .single();
+    .order('updated_at', { ascending: false })
+    .limit(1)
+    .maybeSingle();
 
-  if (error && error.code !== 'PGRST116') throw error; // PGRST116 = row not found
+  if (error) throw error; // maybeSingle() returns null instead of throwing when no row found
   return data ?? null;
 }
 
