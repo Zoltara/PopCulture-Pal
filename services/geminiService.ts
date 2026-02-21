@@ -202,6 +202,10 @@ export const lookupMediaInfo = async (
       
       Context: Today is ${today}.
       
+      IMPORTANT: Also check these resources for comprehensive information:
+      - Sdarot.cc
+      - israwatch.cc
+      
       For EACH series, follow this format:
       **Series Name** - [Hebrew Name]
       [Total Seasons] Seasons
@@ -215,6 +219,10 @@ export const lookupMediaInfo = async (
       
       Context: Today is ${today}.
       
+      IMPORTANT: Check these resources for the most accurate information:
+      - Sdarot.cc
+      - israwatch.cc
+      
       For EACH series:
       **Series Name** - [Hebrew Name] (**Channel**)
       Last Aired: [Date]
@@ -225,6 +233,10 @@ export const lookupMediaInfo = async (
       prompt = `Provide specific details for the Israeli TV series "${query}". 
       Context: Today is ${today}.
       Use Google Search to find the most up-to-date broadcast schedule and season information.
+      
+      IMPORTANT: Check these resources for the most accurate information:
+      - Sdarot.cc
+      - israwatch.cc
 
       STRICT OUTPUT FORMAT:
       **[Channel Name]** - [Hebrew Name]
@@ -279,6 +291,11 @@ export const checkNewEpisodes = async (seriesList: string[]): Promise<EpisodeSta
 ${listStr}
 
 Today is ${today}.
+
+IMPORTANT: For Israeli TV series, prioritize checking these resources:
+- Sdarot.cc
+- israwatch.cc
+- Official channel websites (Kan 11, Keshet 12, Reshet 13, YES, HOT)
 
 For EACH series, output a section in this format:
 **[Series Name]**

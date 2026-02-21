@@ -71,6 +71,15 @@ function getStatusMeta(body: string): { color: string; badge: string; isGoodNews
   return                          { color: 'border-gray-300 bg-white',        badge: '❓ Unknown',        isGoodNews: false };
 }
 
+function getStatusPriority(body: string): number {
+  if (body.includes('✅')) return 1; // New Episodes Available
+  if (body.includes('🔜')) return 2; // New Season Confirmed
+  if (body.includes('🎬')) return 3; // In Production
+  if (body.includes('⏳')) return 4; // Renewal Pending
+  if (body.includes('❌')) return 5; // Cancelled / Ended
+  return 6; // Unknown
+}
+
 /* ── component ────────────────────────────────────────────── */
 
 const SeriesTracker: React.FC = () => {
@@ -247,6 +256,7 @@ const SeriesTracker: React.FC = () => {
     );
 
   const sections = result ? parseResultSections(result.text) : [];
+  const sortedSections = [...sections].sort((a, b) => getStatusPriority(a.body) - getStatusPriority(b.body));
 
   /* ── JSX ────────────────────────────────────────────────── */
   return (
@@ -366,13 +376,13 @@ const SeriesTracker: React.FC = () => {
       </Card>
 
       {/* ── Results ── */}
-      {sections.length > 0 && (
+      {sortedSections.length > 0 && (
         <div className="animate-in fade-in slide-in-from-bottom-2 duration-300 space-y-3">
           <div className="bg-cartoon-dark text-white px-4 py-2 rounded-xl border-2 border-black shadow-hard font-black text-center uppercase tracking-widest text-sm">
             Episode Status Report
           </div>
 
-          {sections.map((sec, i) => {
+          {sortedSections.map((sec, i) => {
             const meta = getStatusMeta(sec.body);
             return (
               <div key={i} className="rounded-xl border-2 border-black shadow-hard overflow-hidden">
