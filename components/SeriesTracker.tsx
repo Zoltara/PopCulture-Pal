@@ -277,7 +277,7 @@ const SeriesTracker: React.FC = () => {
         )}
 
         {/* Add series input */}
-        <form onSubmit={handleAdd} className="flex gap-2 mb-5">
+        <form onSubmit={handleAdd} className="flex flex-col sm:flex-row gap-2 mb-5">
           <input
             type="text"
             value={inputValue}
@@ -285,7 +285,7 @@ const SeriesTracker: React.FC = () => {
             placeholder="e.g. Severance"
             className="flex-1 border-2 border-black rounded-xl p-3 text-lg text-white placeholder-gray-400 bg-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] focus:outline-none focus:ring-4 focus:ring-yellow-400"
           />
-          <Button type="submit" variant="primary" disabled={!inputValue.trim()} className="px-5 text-lg font-black">
+          <Button type="submit" variant="primary" disabled={!inputValue.trim()} className="w-full sm:w-auto px-5 text-lg font-black">
             + Add
           </Button>
         </form>
