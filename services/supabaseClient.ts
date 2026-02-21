@@ -1,9 +1,16 @@
-import { createClient } from '@supabase/supabase-js';
+import { createClient, SupabaseClient } from '@supabase/supabase-js';
 
-const supabaseUrl     = import.meta.env.VITE_SUPABASE_URL     as string;
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY as string;
+const supabaseUrl     = import.meta.env.VITE_SUPABASE_URL     as string | undefined;
+const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY as string | undefined;
 
-export const supabase = createClient(supabaseUrl, supabaseAnonKey);
+// Only create client if both vars are present — prevents crashing the app when
+// env vars are missing (e.g. not yet set in Vercel dashboard).
+export const supabase: SupabaseClient | null =
+  supabaseUrl && supabaseAnonKey
+    ? createClient(supabaseUrl, supabaseAnonKey)
+    : null;
+
+export const isSupabaseAvailable = !!supabase;
 
 /* ── device identity ─────────────────────────────────────────
    We don't require users to sign up. Instead we generate a
@@ -29,6 +36,7 @@ export interface TrackerSettings {
 /* ── series CRUD ─────────────────────────────────────────────*/
 
 export async function fetchSeries(): Promise<string[]> {
+  if (!supabase) throw new Error('Supabase not configured');
   const { data, error } = await supabase
     .from('tracked_series')
     .select('series_name')
@@ -40,6 +48,7 @@ export async function fetchSeries(): Promise<string[]> {
 }
 
 export async function addSeries(name: string): Promise<void> {
+  if (!supabase) throw new Error('Supabase not configured');
   const { error } = await supabase
     .from('tracked_series')
     .insert({ device_id: getDeviceId(), series_name: name });
@@ -48,6 +57,7 @@ export async function addSeries(name: string): Promise<void> {
 }
 
 export async function removeSeries(name: string): Promise<void> {
+  if (!supabase) throw new Error('Supabase not configured');
   const { error } = await supabase
     .from('tracked_series')
     .delete()
@@ -60,6 +70,7 @@ export async function removeSeries(name: string): Promise<void> {
 /* ── settings ────────────────────────────────────────────────*/
 
 export async function fetchSettings(): Promise<TrackerSettings | null> {
+  if (!supabase) throw new Error('Supabase not configured');
   const { data, error } = await supabase
     .from('tracker_settings')
     .select('notif_enabled, last_checked_at')
@@ -71,6 +82,7 @@ export async function fetchSettings(): Promise<TrackerSettings | null> {
 }
 
 export async function saveSettings(settings: Partial<TrackerSettings>): Promise<void> {
+  if (!supabase) throw new Error('Supabase not configured');
   const { error } = await supabase
     .from('tracker_settings')
     .upsert({
