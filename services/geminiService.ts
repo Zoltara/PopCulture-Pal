@@ -3,8 +3,13 @@ import { FavoriteItem, RecommendationResponse } from "../types";
 
 const apiKey = process.env.API_KEY || '';
 
-// Initialize the client strictly with the API key from environment variables
-const ai = new GoogleGenAI({ apiKey });
+// Defer client creation — if the key is missing at build time the import
+// still succeeds and errors are caught per-call instead of crashing the app.
+let _ai: GoogleGenAI | null = null;
+function getAI(): GoogleGenAI {
+  if (!_ai) _ai = new GoogleGenAI({ apiKey });
+  return _ai;
+}
 
 export const getRecommendations = async (favorites: FavoriteItem[], excludeTitles: string[] = []): Promise<RecommendationResponse> => {
   if (!apiKey) {
@@ -55,7 +60,7 @@ export const getRecommendations = async (favorites: FavoriteItem[], excludeTitle
   `;
 
   try {
-    const response = await ai.models.generateContent({
+    const response = await getAI().models.generateContent({
       model: "gemini-3-flash-preview",
       contents: prompt,
       config: {
@@ -115,7 +120,7 @@ export const getWorksByCreator = async (creator: string, category: string, curre
   `;
 
   try {
-    const response = await ai.models.generateContent({
+    const response = await getAI().models.generateContent({
       model: "gemini-3-flash-preview",
       contents: prompt,
       config: {
@@ -233,7 +238,7 @@ export const lookupMediaInfo = async (
   }
 
   try {
-    const response = await ai.models.generateContent({
+    const response = await getAI().models.generateContent({
       model: "gemini-3-flash-preview",
       contents: prompt,
       config: {
@@ -283,7 +288,7 @@ Latest Info: [One or two sentences about the most recent episode, upcoming seaso
 Separate each series with a blank line. Use Google Search to get the most up-to-date information available.`;
 
   try {
-    const response = await ai.models.generateContent({
+    const response = await getAI().models.generateContent({
       model: "gemini-3-flash-preview",
       contents: prompt,
       config: {
