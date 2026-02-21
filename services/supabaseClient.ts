@@ -3,10 +3,20 @@ import { createClient, SupabaseClient } from '@supabase/supabase-js';
 const supabaseUrl     = import.meta.env.VITE_SUPABASE_URL     as string | undefined;
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY as string | undefined;
 
-// Only create client if both vars are present — prevents crashing the app when
-// env vars are missing (e.g. not yet set in Vercel dashboard).
+function isValidHttpUrl(value: string | undefined): value is string {
+  if (!value) return false;
+  try {
+    const u = new URL(value);
+    return u.protocol === 'http:' || u.protocol === 'https:';
+  } catch {
+    return false;
+  }
+}
+
+// Only create client if both vars are present AND the URL is a valid http/https URL.
+// Guards against placeholder values that would cause createClient to throw.
 export const supabase: SupabaseClient | null =
-  supabaseUrl && supabaseAnonKey
+  isValidHttpUrl(supabaseUrl) && supabaseAnonKey
     ? createClient(supabaseUrl, supabaseAnonKey)
     : null;
 
