@@ -15,6 +15,13 @@ function isValidHttpUrl(value: string | undefined): value is string {
 
 // Only create client if both vars are present AND the URL is a valid http/https URL.
 // Guards against placeholder values that would cause createClient to throw.
+if (supabaseUrl && !isValidHttpUrl(supabaseUrl)) {
+  console.error(
+    `[Supabase] VITE_SUPABASE_URL is set but not a valid URL: "${supabaseUrl}"\n` +
+    'It must be in the format: https://<ref>.supabase.co'
+  );
+}
+
 export const supabase: SupabaseClient | null =
   isValidHttpUrl(supabaseUrl) && supabaseAnonKey
     ? createClient(supabaseUrl, supabaseAnonKey)

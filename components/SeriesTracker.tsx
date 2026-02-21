@@ -5,6 +5,7 @@ import { checkNewEpisodes, EpisodeStatusResult } from '../services/geminiService
 import {
   fetchSeries, addSeries, removeSeries,
   fetchSettings, saveSettings,
+  isSupabaseAvailable,
 } from '../services/supabaseClient';
 
 const STORAGE_KEY        = 'popculture-pal-tracked-series';  // local cache only
@@ -99,6 +100,10 @@ const SeriesTracker: React.FC = () => {
 
   /* ── initial load from Supabase ─────────────────────────── */
   useEffect(() => {
+    if (!isSupabaseAvailable) {
+      setDbLoading(false);
+      return;
+    }
     (async () => {
       try {
         const [cloud, settings] = await Promise.all([fetchSeries(), fetchSettings()]);
@@ -255,9 +260,14 @@ const SeriesTracker: React.FC = () => {
             Syncing with cloud...
           </div>
         )}
-        {!dbLoading && syncError && (
+        {!dbLoading && !isSupabaseAvailable && (
           <div className="flex items-center gap-2 mb-4 bg-yellow-50 border border-yellow-400 rounded-lg px-3 py-2 text-xs font-bold text-yellow-800">
-            ⚠️ Cloud unavailable — using local data. Add your Supabase keys to enable sync.
+            ⚠️ Supabase not configured — check that <code>VITE_SUPABASE_URL</code> and <code>VITE_SUPABASE_ANON_KEY</code> are set correctly in Vercel.
+          </div>
+        )}
+        {!dbLoading && isSupabaseAvailable && syncError && (
+          <div className="flex items-center gap-2 mb-4 bg-yellow-50 border border-yellow-400 rounded-lg px-3 py-2 text-xs font-bold text-yellow-800">
+            ⚠️ Cloud sync failed — using local data.
           </div>
         )}
         {!dbLoading && !syncError && (
