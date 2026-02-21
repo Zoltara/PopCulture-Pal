@@ -180,7 +180,24 @@ const InfoFinder: React.FC = () => {
           )}
 
           <Button type="submit" variant="secondary" disabled={loading || (!searchCurrentAiring && !query.trim() && !selectedChannel)} className="mt-2 w-full justify-center text-xl py-4">
-            {loading ? 'Scanning...' : 'Find Info 🔎'}
+            {loading ? (
+              <span className="flex items-center justify-center gap-3">
+                <span className="relative flex items-center justify-center w-6 h-6 shrink-0">
+                  <span className="absolute inset-0 rounded-full border-[3px] border-black border-t-transparent animate-spin" />
+                  <span className="text-sm">🔎</span>
+                </span>
+                <span className="flex items-center gap-1">
+                  {[0, 1, 2].map((i) => (
+                    <span
+                      key={i}
+                      className="w-2 h-2 rounded-full bg-black animate-bounce inline-block"
+                      style={{ animationDelay: `${i * 0.15}s` }}
+                    />
+                  ))}
+                </span>
+                <span>{selectedChannel ? `Scanning ${selectedChannel.name}` : 'Scanning'}</span>
+              </span>
+            ) : 'Find Info 🔎'}
           </Button>
         </form>
       </Card>

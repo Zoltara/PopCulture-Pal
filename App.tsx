@@ -6,9 +6,10 @@ import ItemList from './components/ItemList';
 import Card from './components/Card';
 import Button from './components/Button';
 import InfoFinder from './components/InfoFinder';
+import SeriesTracker from './components/SeriesTracker';
 
 const App: React.FC = () => {
-  const [activeTab, setActiveTab] = useState<'vibe' | 'info'>('vibe');
+  const [activeTab, setActiveTab] = useState<'vibe' | 'info' | 'tracker'>('vibe');
   const [favorites, setFavorites] = useState<FavoriteItem[]>([]);
   const [recommendations, setRecommendations] = useState<Recommendation[]>([]);
   const [loading, setLoading] = useState(false);
@@ -93,10 +94,7 @@ const App: React.FC = () => {
       <header className="mb-8 text-center max-w-2xl mx-auto">
         <div className="bg-white/90 p-4 rounded-2xl border-2 border-black shadow-hard inline-block backdrop-blur-sm">
           <div className="flex items-center justify-center gap-3 mb-1">
-            <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="#FFD93D" stroke="#000000" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="drop-shadow-md">
-              <path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1-2.5-2.5Z" />
-              <path d="M6.5 17H20" />
-            </svg>
+            <img src="/icons/favicon-192.png" alt="PopCulture Pal logo" width={52} height={52} className="drop-shadow-md rounded-xl" />
             <h1 className="text-4xl md:text-6xl font-black text-cartoon-dark drop-shadow-[2px_2px_0_rgba(255,217,61,1)] tracking-tighter">
               PopCulture Pal
             </h1>
@@ -108,7 +106,7 @@ const App: React.FC = () => {
       </header>
 
       {/* Navigation Tabs */}
-      <div className="flex justify-center gap-4 mb-8">
+      <div className="flex flex-wrap justify-center gap-3 mb-8">
         <Button 
           onClick={() => setActiveTab('vibe')} 
           variant={activeTab === 'vibe' ? 'primary' : 'secondary'}
@@ -122,6 +120,13 @@ const App: React.FC = () => {
           className="text-lg"
         >
           🔍 Info Finder
+        </Button>
+        <Button
+          onClick={() => setActiveTab('tracker')}
+          variant={activeTab === 'tracker' ? 'primary' : 'secondary'}
+          className="text-lg"
+        >
+          🔔 Episode Tracker
         </Button>
       </div>
 
@@ -245,10 +250,15 @@ const App: React.FC = () => {
                )}
             </section>
           </div>
-        ) : (
+        ) : activeTab === 'info' ? (
           /* Info Finder Tab */
           <div className="flex justify-center items-start min-h-[400px]">
              <InfoFinder />
+          </div>
+        ) : (
+          /* Episode Tracker Tab */
+          <div className="flex justify-center items-start min-h-[400px]">
+            <SeriesTracker />
           </div>
         )}
       </main>

@@ -256,3 +256,53 @@ export const lookupMediaInfo = async (
     throw new Error("Failed to lookup info. Please check your connection.");
   }
 };
+
+export interface EpisodeStatusResult {
+  text: string;
+  sources: { uri: string; title: string }[];
+}
+
+export const checkNewEpisodes = async (seriesList: string[]): Promise<EpisodeStatusResult> => {
+  if (!apiKey) throw new Error("API Key is missing.");
+  if (seriesList.length === 0) throw new Error("No series to check.");
+
+  const today = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+  const listStr = seriesList.map((s, i) => `${i + 1}. ${s}`).join('\n');
+
+  const prompt = `Using Google Search, check the latest episode status for each of these TV series:
+
+${listStr}
+
+Today is ${today}.
+
+For EACH series, output a section in this format:
+**[Series Name]**
+Status: [One of: ✅ New Episodes Available | 🔜 New Season Confirmed | 🎬 In Production | ⏳ Renewal Pending | ❌ Cancelled / Ended]
+Latest Info: [One or two sentences about the most recent episode, upcoming season, or finale. Include dates where known.]
+
+Separate each series with a blank line. Use Google Search to get the most up-to-date information available.`;
+
+  try {
+    const response = await ai.models.generateContent({
+      model: "gemini-3-flash-preview",
+      contents: prompt,
+      config: {
+        tools: [{ googleSearch: {} }],
+      },
+    });
+
+    const text = response.text || "Could not retrieve episode status.";
+    const chunks = response.candidates?.[0]?.groundingMetadata?.groundingChunks || [];
+    const sources = chunks
+      .filter((chunk: any) => chunk.web)
+      .map((chunk: any) => ({
+        uri: chunk.web.uri,
+        title: chunk.web.title,
+      }));
+
+    return { text, sources };
+  } catch (error) {
+    console.error("Gemini Episode Check Error:", error);
+    throw new Error("Failed to check episode status. Please try again.");
+  }
+};
