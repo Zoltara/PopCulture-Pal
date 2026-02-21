@@ -29,20 +29,10 @@ export const supabase: SupabaseClient | null =
 
 export const isSupabaseAvailable = !!supabase;
 
-/* ── device identity ─────────────────────────────────────────
-   We don't require users to sign up. Instead we generate a
-   random UUID once per device and persist it in localStorage.
-   This UUID is used as the row identifier in Supabase.        */
-const DEVICE_ID_KEY = 'popculture-pal-device-id';
-
-export function getDeviceId(): string {
-  let id = localStorage.getItem(DEVICE_ID_KEY);
-  if (!id) {
-    id = crypto.randomUUID();
-    localStorage.setItem(DEVICE_ID_KEY, id);
-  }
-  return id;
-}
+/* ── owner identity ──────────────────────────────────────────
+   This is a single-owner personal app. All rows use a fixed
+   owner ID so data is never lost when localStorage is cleared. */
+const OWNER_ID = 'owner';
 
 /* ── types ───────────────────────────────────────────────────*/
 export interface TrackerSettings {
@@ -57,7 +47,7 @@ export async function fetchSeries(): Promise<string[]> {
   const { data, error } = await supabase
     .from('tracked_series')
     .select('series_name')
-    .eq('device_id', getDeviceId())
+    .eq('device_id', OWNER_ID)
     .order('added_at', { ascending: true });
 
   if (error) throw error;
@@ -68,7 +58,7 @@ export async function addSeries(name: string): Promise<void> {
   if (!supabase) throw new Error('Supabase not configured');
   const { error } = await supabase
     .from('tracked_series')
-    .insert({ device_id: getDeviceId(), series_name: name });
+    .insert({ device_id: OWNER_ID, series_name: name });
 
   if (error) throw error;
 }
@@ -78,7 +68,7 @@ export async function removeSeries(name: string): Promise<void> {
   const { error } = await supabase
     .from('tracked_series')
     .delete()
-    .eq('device_id', getDeviceId())
+    .eq('device_id', OWNER_ID)
     .eq('series_name', name);
 
   if (error) throw error;
@@ -91,7 +81,7 @@ export async function fetchSettings(): Promise<TrackerSettings | null> {
   const { data, error } = await supabase
     .from('tracker_settings')
     .select('notif_enabled, last_checked_at')
-    .eq('device_id', getDeviceId())
+    .eq('device_id', OWNER_ID)
     .single();
 
   if (error && error.code !== 'PGRST116') throw error; // PGRST116 = row not found
@@ -103,7 +93,7 @@ export async function saveSettings(settings: Partial<TrackerSettings>): Promise<
   const { error } = await supabase
     .from('tracker_settings')
     .upsert({
-      device_id: getDeviceId(),
+      device_id: OWNER_ID,
       updated_at: new Date().toISOString(),
       ...settings,
     }, { onConflict: 'device_id' });
