@@ -115,8 +115,15 @@ const InfoFinder: React.FC = () => {
   const renderResult = (text: string) => {
     const lines = text.split('\n');
     return lines.map((line, lineIndex) => {
-      const statusColor = getStatusColor(line);
-      const parts = line.split(/(\*\*.*?\*\*)/g);
+      // Remove ### from lines
+      let cleanedLine = line.replace(/^###\s*/, '');
+      
+      const statusColor = getStatusColor(cleanedLine);
+      
+      // Check if this line starts a new show (numbered list like "1.", "2.", etc.)
+      const isNewShow = /^\d+\.\s/.test(cleanedLine.trim());
+      
+      const parts = cleanedLine.split(/(\*\*.*?\*\*)/g);
       const renderedLine = parts.map((part, index) => {
         if (part.startsWith('**') && part.endsWith('**')) {
           return <strong key={index} className="font-black text-cartoon-blue">{part.slice(2, -2)}</strong>;
@@ -126,16 +133,16 @@ const InfoFinder: React.FC = () => {
 
       if (statusColor) {
         return (
-          <div key={lineIndex} className={`${statusColor} px-3 py-2 rounded-lg mb-2 font-medium`}>
+          <div key={lineIndex} className={`${statusColor} px-3 py-2 rounded-lg mb-2 font-medium ${isNewShow && lineIndex > 0 ? 'mt-4' : ''}`}>
             {renderedLine}
           </div>
         );
       }
 
       return (
-        <div key={lineIndex}>
+        <div key={lineIndex} className={isNewShow && lineIndex > 0 ? 'mt-4' : ''}>
           {renderedLine}
-          {line && <br />}
+          {cleanedLine && <br />}
         </div>
       );
     });
