@@ -154,10 +154,10 @@ const InfoFinder: React.FC = () => {
         {intro.map((line, i) => renderLine(line, i))}
         {sections.map((secLines, secIdx) => (
           <React.Fragment key={secIdx}>
-            {secIdx > 0 && (
-              <div style={{ borderTop: '3px solid #000', margin: '24px 0 16px' }} />
-            )}
-            <div className="font-black text-lg text-black mb-1">
+            <div
+              className="font-black text-lg text-black mb-1"
+              style={secIdx > 0 ? { borderTop: '3px solid #000', paddingTop: '16px', marginTop: '16px' } : {}}
+            >
               {secIdx + 1}. {secLines[0]}
             </div>
             {secLines.slice(1).map((line, i) => renderLine(line, i))}
