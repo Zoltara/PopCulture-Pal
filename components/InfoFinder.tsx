@@ -114,15 +114,20 @@ const InfoFinder: React.FC = () => {
 
   const renderResult = (text: string) => {
     const lines = text.split('\n');
+    let showNumber = 0;
+
     return lines.map((line, lineIndex) => {
-      // Remove ### from lines
       let cleanedLine = line.replace(/^###\s*/, '');
-      
+
       const statusColor = getStatusColor(cleanedLine);
-      
-      // Check if this line starts a new show (numbered list like "1.", "2.", etc.)
-      const isNewShow = /^\d+\.\s/.test(cleanedLine.trim());
-      
+
+      // Detect start of a new show: "Series Name", "**Series Name**", or numbered "1. "
+      const isNewShow =
+        /series\s*name/i.test(cleanedLine) ||
+        /^\d+\.\s/.test(cleanedLine.trim());
+
+      if (isNewShow) showNumber++;
+
       const parts = cleanedLine.split(/(\*\*.*?\*\*)/g);
       const renderedLine = parts.map((part, index) => {
         if (part.startsWith('**') && part.endsWith('**')) {
@@ -133,21 +138,29 @@ const InfoFinder: React.FC = () => {
 
       if (statusColor) {
         return (
-          <div key={lineIndex} className={`${statusColor} px-3 py-2 rounded-lg mb-2 font-medium ${isNewShow && lineIndex > 0 ? 'mt-8' : ''}`}>
-            {renderedLine}
-          </div>
+          <React.Fragment key={lineIndex}>
+            {isNewShow && showNumber > 1 && (
+              <hr className="my-5 border-0 border-t-2 border-black" />
+            )}
+            {isNewShow && (
+              <div className="font-black text-lg text-black mb-1">{showNumber}. {renderedLine}</div>
+            )}
+            {!isNewShow && (
+              <div className={`${statusColor} px-3 py-2 rounded-lg mb-2 font-medium`}>
+                {renderedLine}
+              </div>
+            )}
+          </React.Fragment>
         );
       }
 
-      // Add separator line before new numbered shows
-      if (isNewShow && lineIndex > 0) {
+      if (isNewShow) {
         return (
           <React.Fragment key={lineIndex}>
-            <div className="my-6 border-t-4 border-black"></div>
-            <div>
-              {renderedLine}
-              {cleanedLine && <br />}
-            </div>
+            {showNumber > 1 && (
+              <hr className="my-5 border-0 border-t-2 border-black" />
+            )}
+            <div className="font-black text-lg text-black mb-1">{showNumber}. {renderedLine}</div>
           </React.Fragment>
         );
       }
