@@ -113,69 +113,58 @@ const InfoFinder: React.FC = () => {
   };
 
   const renderResult = (text: string) => {
-    const lines = text.split('\n');
-    let showNumber = 0;
+    const allLines = text.split('\n').map(l => l.replace(/^###\s*/, ''));
 
-    return lines.map((line, lineIndex) => {
-      let cleanedLine = line.replace(/^###\s*/, '');
+    // Split into intro text + per-show sections
+    const intro: string[] = [];
+    const sections: string[][] = [];
 
-      const statusColor = getStatusColor(cleanedLine);
+    for (const line of allLines) {
+      const isShowStart =
+        /series\s*name/i.test(line) ||
+        /^\d+\.\s/.test(line.trim());
 
-      // Detect start of a new show: "Series Name" or numbered "1. "
-      const isNewShow =
-        /series\s*name/i.test(cleanedLine) ||
-        /^\d+\.\s/.test(cleanedLine.trim());
-
-      if (isNewShow) {
-        showNumber++;
-        // Strip existing leading number (e.g. "1. " or "2. ") to avoid double numbering
-        cleanedLine = cleanedLine.replace(/^\d+\.\s*/, '');
+      if (isShowStart) {
+        // strip any leading "1. " so we re-number ourselves
+        const stripped = line.replace(/^\d+\.\s*/, '');
+        sections.push([stripped]);
+      } else if (sections.length === 0) {
+        intro.push(line);
+      } else {
+        sections[sections.length - 1].push(line);
       }
+    }
 
-      const parts = cleanedLine.split(/(\*\*.*?\*\*)/g);
-      const renderedLine = parts.map((part, index) => {
-        if (part.startsWith('**') && part.endsWith('**')) {
-          return <strong key={index} className="font-black text-cartoon-blue">{part.slice(2, -2)}</strong>;
-        }
-        return <span key={index}>{part}</span>;
-      });
-
-      if (statusColor) {
-        return (
-          <React.Fragment key={lineIndex}>
-            {isNewShow && showNumber > 1 && (
-              <div style={{ height: '2px', background: '#000', margin: '20px 0' }} />
-            )}
-            {isNewShow && (
-              <div className="font-black text-lg text-black mb-1">{showNumber}. {renderedLine}</div>
-            )}
-            {!isNewShow && (
-              <div className={`${statusColor} px-3 py-2 rounded-lg mb-2 font-medium`}>
-                {renderedLine}
-              </div>
-            )}
-          </React.Fragment>
-        );
-      }
-
-      if (isNewShow) {
-        return (
-          <React.Fragment key={lineIndex}>
-            {showNumber > 1 && (
-              <div style={{ height: '2px', background: '#000', margin: '20px 0' }} />
-            )}
-            <div className="font-black text-lg text-black mb-1">{showNumber}. {renderedLine}</div>
-          </React.Fragment>
-        );
-      }
-
-      return (
-        <div key={lineIndex}>
-          {renderedLine}
-          {cleanedLine && <br />}
-        </div>
+    const renderLine = (line: string, key: number) => {
+      const statusColor = getStatusColor(line);
+      const parts = line.split(/(\*\*.*?\*\*)/g);
+      const rendered = parts.map((part, i) =>
+        part.startsWith('**') && part.endsWith('**')
+          ? <strong key={i} className="font-black text-cartoon-blue">{part.slice(2, -2)}</strong>
+          : <span key={i}>{part}</span>
       );
-    });
+      if (statusColor) {
+        return <div key={key} className={`${statusColor} px-3 py-2 rounded-lg mb-2 font-medium`}>{rendered}</div>;
+      }
+      return <div key={key}>{rendered}{line && <br />}</div>;
+    };
+
+    return (
+      <>
+        {intro.map((line, i) => renderLine(line, i))}
+        {sections.map((secLines, secIdx) => (
+          <React.Fragment key={secIdx}>
+            {secIdx > 0 && (
+              <div style={{ height: '2px', background: '#000', margin: '20px 0' }} />
+            )}
+            <div className="font-black text-lg text-black mb-1">
+              {secIdx + 1}. {secLines[0]}
+            </div>
+            {secLines.slice(1).map((line, i) => renderLine(line, i))}
+          </React.Fragment>
+        ))}
+      </>
+    );
   };
 
   const getChannelLink = (): { url: string; label: string } | null => {
