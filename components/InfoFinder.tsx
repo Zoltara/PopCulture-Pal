@@ -126,8 +126,9 @@ const InfoFinder: React.FC = () => {
         /^\*\*[^*]+\*\*\s*[-–]\s*\[/.test(line); // "**Title** - [Hebrew]"
 
       if (isShowStart) {
-        // strip any leading "1. " so we re-number ourselves
-        const stripped = line.replace(/^\d+\.\s*/, '');
+        const stripped = line
+          .replace(/^\d+\.\s*/, '')        // strip leading "1. "
+          .replace(/^\*\*\d+\.\s*/, '**'); // strip number inside "**1. Title**" → "**Title**"
         sections.push([stripped]);
       } else if (sections.length === 0) {
         intro.push(line);
@@ -159,7 +160,11 @@ const InfoFinder: React.FC = () => {
               className="font-black text-lg text-black mb-1"
               style={secIdx > 0 ? { borderTop: '3px solid #000', paddingTop: '16px', marginTop: '16px' } : {}}
             >
-              {secIdx + 1}. {secLines[0]}
+              {secIdx + 1}. {secLines[0].split(/(\*\*.*?\*\*)/g).map((part, i) =>
+                part.startsWith('**') && part.endsWith('**')
+                  ? <strong key={i}>{part.slice(2, -2)}</strong>
+                  : <span key={i}>{part}</span>
+              )}
             </div>
             {secLines.slice(1).map((line, i) => renderLine(line, i))}
           </React.Fragment>
