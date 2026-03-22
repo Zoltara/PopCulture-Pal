@@ -91,14 +91,79 @@ const InfoFinder: React.FC = () => {
     handleSearch(undefined, channel);
   };
 
-  const renderResult = (text: string) => {
-    const parts = text.split(/(\*\*.*?\*\*)/g);
-    return parts.map((part, index) => {
-      if (part.startsWith('**') && part.endsWith('**')) {
-        return <strong key={index} className="font-black text-cartoon-blue">{part.slice(2, -2)}</strong>;
+  const getStatusColor = (line: string): string | null => {
+    const lowerLine = line.toLowerCase();
+    
+    // Check for status indicators
+    if (lowerLine.includes('status:') || lowerLine.includes('coming soon') || lowerLine.includes('next episode')) {
+      // New series indicators
+      if (lowerLine.includes('new') || lowerLine.includes('premiered') || lowerLine.includes('just started')) {
+        return 'bg-green-100 border-l-4 border-green-500 text-green-900';
       }
-      return <span key={index}>{part}</span>;
+      // Actively running indicators
+      if (lowerLine.includes('actively') || lowerLine.includes('currently airing') || lowerLine.includes('broadcasting') || lowerLine.includes('weekly')) {
+        return 'bg-yellow-100 border-l-4 border-yellow-500 text-yellow-900';
+      }
+      // VOD indicators
+      if (lowerLine.includes('vod') || lowerLine.includes('completed') || lowerLine.includes('ended') || lowerLine.includes('available')) {
+        return 'bg-blue-100 border-l-4 border-blue-500 text-blue-900';
+      }
+    }
+    return null;
+  };
+
+  const renderResult = (text: string) => {
+    const lines = text.split('\n');
+    return lines.map((line, lineIndex) => {
+      const statusColor = getStatusColor(line);
+      const parts = line.split(/(\*\*.*?\*\*)/g);
+      const renderedLine = parts.map((part, index) => {
+        if (part.startsWith('**') && part.endsWith('**')) {
+          return <strong key={index} className="font-black text-cartoon-blue">{part.slice(2, -2)}</strong>;
+        }
+        return <span key={index}>{part}</span>;
+      });
+
+      if (statusColor) {
+        return (
+          <div key={lineIndex} className={`${statusColor} px-3 py-2 rounded-lg mb-2 font-medium`}>
+            {renderedLine}
+          </div>
+        );
+      }
+
+      return (
+        <div key={lineIndex}>
+          {renderedLine}
+          {line && <br />}
+        </div>
+      );
     });
+  };
+
+  const getChannelLink = (): { url: string; label: string } | null => {
+    if (!result) return null;
+
+    const resultText = result.text.toLowerCase();
+    
+    // Check for channel names in the result or selected channel
+    if (selectedChannel?.id === 'kan11' || resultText.includes('kan 11') || resultText.includes('כאן 11')) {
+      return { url: 'https://www.kan.org.il/lobby/kan-box/', label: 'Kan Box' };
+    }
+    if (selectedChannel?.id === 'keshet12' || resultText.includes('keshet 12') || resultText.includes('mako') || resultText.includes('ערוץ 12')) {
+      return { url: 'https://www.mako.co.il/mako-vod-index', label: 'Mako VOD' };
+    }
+    if (selectedChannel?.id === 'reshet13' || resultText.includes('reshet 13') || resultText.includes('רשת 13') || resultText.includes('ערוץ 13')) {
+      return { url: 'https://13tv.co.il/all-shows/all-shows-list/', label: 'All Shows' };
+    }
+    if (selectedChannel?.id === 'yes' || resultText.includes('yes')) {
+      return { url: 'https://www.yes.co.il/content/series/', label: 'YES' };
+    }
+    if (selectedChannel?.id === 'hot' || resultText.includes('hot')) {
+      return { url: 'https://www.hot.net.il/heb/tv/channels/hotchannels/', label: 'HOT' };
+    }
+
+    return null;
   };
 
   return (
@@ -209,9 +274,38 @@ const InfoFinder: React.FC = () => {
             <h3 className="font-black text-xl mb-3 text-cartoon-dark border-b-2 border-gray-200 pb-2">
               {selectedChannel ? `Scanning ${selectedChannel.name}...` : 'Search Result:'}
             </h3>
-            <div className="text-md font-medium leading-relaxed text-black whitespace-pre-wrap mb-4">
+            
+            {/* Status Color Code Legend */}
+            {mode === 'israeli' && (
+              <div className="mb-4 p-3 bg-gray-50 rounded-lg border border-gray-200">
+                <p className="text-xs font-bold uppercase text-gray-600 mb-2">Status Color Code:</p>
+                <div className="flex flex-wrap gap-2 text-xs">
+                  <span className="bg-green-100 border-l-4 border-green-500 text-green-900 px-2 py-1 rounded font-semibold">🟢 New Series</span>
+                  <span className="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-900 px-2 py-1 rounded font-semibold">🟡 Actively Running</span>
+                  <span className="bg-blue-100 border-l-4 border-blue-500 text-blue-900 px-2 py-1 rounded font-semibold">🔵 VOD</span>
+                </div>
+              </div>
+            )}
+
+            <div className="text-md font-medium leading-relaxed text-black mb-4">
               {renderResult(result.text)}
             </div>
+
+            {/* Channel-Specific Link */}
+            {mode === 'israeli' && getChannelLink() && (
+              <div className="mt-4 mb-4">
+                <a
+                  href={getChannelLink()!.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-2 bg-cartoon-purple hover:bg-cartoon-purple/80 text-white font-bold py-3 px-6 rounded-xl border-2 border-black shadow-hard hover:shadow-none transition-all"
+                >
+                  <span>📺</span>
+                  <span>View More on {getChannelLink()!.label}</span>
+                  <span>→</span>
+                </a>
+              </div>
+            )}
 
             {result.sources.length > 0 && (
               <div className="mt-4 pt-4 border-t-2 border-dashed border-gray-200">
