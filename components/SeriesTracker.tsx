@@ -377,7 +377,7 @@ const SeriesTracker: React.FC = () => {
 
       {/* ── Results ── */}
       {sortedSections.length > 0 && (
-        <div className="animate-in fade-in slide-in-from-bottom-2 duration-300 space-y-3">
+        <div className="animate-in fade-in slide-in-from-bottom-2 duration-300">
           <div className="bg-cartoon-dark text-white px-4 py-2 rounded-xl border-2 border-black shadow-hard font-black text-center uppercase tracking-widest text-sm">
             Episode Status Report
           </div>
@@ -385,7 +385,11 @@ const SeriesTracker: React.FC = () => {
           {sortedSections.map((sec, i) => {
             const meta = getStatusMeta(sec.body);
             return (
-              <div key={i} className="rounded-xl border-2 border-black shadow-hard overflow-hidden">
+              <React.Fragment key={i}>
+                {i > 0 && (
+                  <div className="my-4 border-t-2 border-dashed border-gray-300" />
+                )}
+                <div className="rounded-xl border-2 border-black shadow-hard overflow-hidden">
                 {/* header */}
                 <div className={`flex items-center justify-between px-4 py-2 border-b-2 border-black ${meta.color}`}>
                   <h3 className="font-black text-base text-black">{sec.title || '—'}</h3>
@@ -398,6 +402,7 @@ const SeriesTracker: React.FC = () => {
                   </div>
                 </div>
               </div>
+              </React.Fragment>
             );
           })}
 
