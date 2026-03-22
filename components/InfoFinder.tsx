@@ -121,7 +121,7 @@ const InfoFinder: React.FC = () => {
 
       const statusColor = getStatusColor(cleanedLine);
 
-      // Detect start of a new show: "Series Name", "**Series Name**", or numbered "1. "
+      // Detect start of a new show: "Series Name" or numbered "1. "
       const isNewShow =
         /series\s*name/i.test(cleanedLine) ||
         /^\d+\.\s/.test(cleanedLine.trim());
@@ -140,7 +140,7 @@ const InfoFinder: React.FC = () => {
         return (
           <React.Fragment key={lineIndex}>
             {isNewShow && showNumber > 1 && (
-              <hr className="my-5 border-0 border-t-2 border-black" />
+              <div style={{ height: '2px', background: '#000', margin: '20px 0' }} />
             )}
             {isNewShow && (
               <div className="font-black text-lg text-black mb-1">{showNumber}. {renderedLine}</div>
@@ -158,7 +158,7 @@ const InfoFinder: React.FC = () => {
         return (
           <React.Fragment key={lineIndex}>
             {showNumber > 1 && (
-              <hr className="my-5 border-0 border-t-2 border-black" />
+              <div style={{ height: '2px', background: '#000', margin: '20px 0' }} />
             )}
             <div className="font-black text-lg text-black mb-1">{showNumber}. {renderedLine}</div>
           </React.Fragment>
