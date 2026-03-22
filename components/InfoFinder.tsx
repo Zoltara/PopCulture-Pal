@@ -143,7 +143,7 @@ const InfoFinder: React.FC = () => {
       if (isNewShow && lineIndex > 0) {
         return (
           <React.Fragment key={lineIndex}>
-            <div className="my-4 border-t-2 border-dashed border-gray-300"></div>
+            <div className="my-6 border-t-4 border-black"></div>
             <div>
               {renderedLine}
               {cleanedLine && <br />}
