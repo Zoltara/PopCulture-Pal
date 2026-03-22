@@ -121,8 +121,9 @@ const InfoFinder: React.FC = () => {
 
     for (const line of allLines) {
       const isShowStart =
-        /series\s*name/i.test(line) ||
-        /^\d+\.\s/.test(line.trim());
+        /series\s*name/i.test(line) ||           // "Series Name - Foo"
+        /^\d+\.\s/.test(line.trim()) ||           // "1. Foo"
+        /^\*\*[^*]+\*\*\s*[-–]\s*\[/.test(line); // "**Title** - [Hebrew]"
 
       if (isShowStart) {
         // strip any leading "1. " so we re-number ourselves
