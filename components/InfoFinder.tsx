@@ -126,7 +126,11 @@ const InfoFinder: React.FC = () => {
         /series\s*name/i.test(cleanedLine) ||
         /^\d+\.\s/.test(cleanedLine.trim());
 
-      if (isNewShow) showNumber++;
+      if (isNewShow) {
+        showNumber++;
+        // Strip existing leading number (e.g. "1. " or "2. ") to avoid double numbering
+        cleanedLine = cleanedLine.replace(/^\d+\.\s*/, '');
+      }
 
       const parts = cleanedLine.split(/(\*\*.*?\*\*)/g);
       const renderedLine = parts.map((part, index) => {
