@@ -133,7 +133,7 @@ const InfoFinder: React.FC = () => {
 
       if (statusColor) {
         return (
-          <div key={lineIndex} className={`${statusColor} px-3 py-2 rounded-lg mb-2 font-medium ${isNewShow && lineIndex > 0 ? 'mt-6' : ''}`}>
+          <div key={lineIndex} className={`${statusColor} px-3 py-2 rounded-lg mb-2 font-medium ${isNewShow && lineIndex > 0 ? 'mt-8' : ''}`}>
             {renderedLine}
           </div>
         );
@@ -143,7 +143,7 @@ const InfoFinder: React.FC = () => {
       if (isNewShow && lineIndex > 0) {
         return (
           <React.Fragment key={lineIndex}>
-            <div className="h-4"></div>
+            <div className="h-6 my-2"></div>
             <div>
               {renderedLine}
               {cleanedLine && <br />}
